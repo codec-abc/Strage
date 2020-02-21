@@ -98,19 +98,22 @@ namespace Menu
 		}
 	}
 
+	int focusedMenuItemIndex = 0; 
+	int isGoUpKeyPressed = 0, isGoDownKeyPressed = 0, isSelectKeyPressed = 0;
+	SDL_Texture *pointerTexture;
+
 	int display(const char *pointerStringMenuTitle, const char *pointerStringsMenuItemsTexts[], int menuItemsCount)
-	{
+	{	
 		SDL_Event event;
-		int returnValue, i, focusedMenuItemIndex = 0, isGoUpKeyPressed = 0, isGoDownKeyPressed = 0, isSelectKeyPressed = 0;
-		SDL_Texture *pointerTexture;
-		
+		int returnValue = 3;
+		int i;
 		// This variable is shared by all internal functions, it must be initialized before calling any of the functions
 		_menuItemsCount = menuItemsCount;
 		
 		// Cache textures to display
 		_initialize(pointerStringMenuTitle, pointerStringsMenuItemsTexts);
 		
-		while (1)
+		//while (1)
 		{
 			Renderer::beginFrame();
 			
@@ -162,16 +165,21 @@ namespace Menu
 			}
 			else isGoDownKeyPressed = 0;
 			// Select key
-			if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PRIMARY_SHOOT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_MENU_SELECT)) isSelectKeyPressed = 1; // Wait for the key to be released to execute the associated action, so the shoot key is not pressed when entering the game (this avoids the player immediately shooting when entering the game because the shoot key is pressed yet)
-			else if (isSelectKeyPressed)
+			if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PRIMARY_SHOOT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_MENU_SELECT)) 
 			{
-				AudioManager::playSound(AudioManager::SOUND_ID_MENU_SELECT);
-				SDL_Delay(500); // Wait a bit for the sound to be played, because when this function quits _loadNextLevel() is called and it stops all playing sounds
-				
-				returnValue = focusedMenuItemIndex;
-				LOG_DEBUG("Selected item %d.", focusedMenuItemIndex);
-				goto Exit;
+				//isSelectKeyPressed = 1;
+				return focusedMenuItemIndex;
+				// Wait for the key to be released to execute the associated action, so the shoot key is not pressed when entering the game (this avoids the player immediately shooting when entering the game because the shoot key is pressed yet)
 			}
+			// else if (isSelectKeyPressed)
+			// {
+			// 	AudioManager::playSound(AudioManager::SOUND_ID_MENU_SELECT);
+			// 	SDL_Delay(500); // Wait a bit for the sound to be played, because when this function quits _loadNextLevel() is called and it stops all playing sounds
+				
+			// 	//returnValue = focusedMenuItemIndex;
+			// 	LOG_DEBUG("Selected item %d.", focusedMenuItemIndex);
+			// 	goto Exit;
+			// }
 			
 			// Display menu
 			// Display stretched background (so it can fit any screen resolution)
@@ -196,27 +204,29 @@ namespace Menu
 		_uninitialize();
 		return returnValue;
 	}
+
+	static const char *pointerStringMenuItems[] =
+	{
+		"Arrow keys or WASD : move",
+		"Space : primary shoot",
+		"Left control : mortar shoot",
+		"Escape : pause game",
+		"Back"
+	};
+		
+	// This variable is shared by all internal functions, it must be initialized before calling any of the functions
+
 	
 	int displayControlsMenu()
 	{
 		SDL_Event event;
-		int returnValue, i, isSelectKeyPressed = 0;
-		static const char *pointerStringMenuItems[] =
-		{
-			"Arrow keys or WASD : move",
-			"Space : primary shoot",
-			"Left control : mortar shoot",
-			"Escape : pause game",
-			"Back"
-		};
-		
-		// This variable is shared by all internal functions, it must be initialized before calling any of the functions
-		_menuItemsCount = 5;
-		
+		int i;
+		int returnValue = 0;
+		int isSelectKeyPressed = 0;
 		// Cache textures to display
 		_initialize("Controls", pointerStringMenuItems);
 		
-		while (1)
+		//while (1)
 		{
 			Renderer::beginFrame();
 			
@@ -246,14 +256,20 @@ namespace Menu
 			
 			// Handle key press
 			// Select key
-			if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PRIMARY_SHOOT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_MENU_SELECT)) isSelectKeyPressed = 1; // Wait for the key to be released to execute the associated action, so the shoot key is not pressed when entering the game (this avoids the player immediately shooting when entering the game because the shoot key is pressed yet)
-			else if (isSelectKeyPressed)
+			if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PRIMARY_SHOOT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_MENU_SELECT)) 
+		
 			{
-				AudioManager::playSound(AudioManager::SOUND_ID_MENU_SELECT);
-				SDL_Delay(500); // Wait a bit for the sound to be played, because when this function quits _loadNextLevel() is called and it stops all playing sounds
-				returnValue = 0;
-				goto Exit;
+				isSelectKeyPressed = 1; 
+				return focusedMenuItemIndex;
+				// Wait for the key to be released to execute the associated action, so the shoot key is not pressed when entering the game (this avoids the player immediately shooting when entering the game because the shoot key is pressed yet)
 			}
+			// else if (isSelectKeyPressed)
+			// {
+			// 	AudioManager::playSound(AudioManager::SOUND_ID_MENU_SELECT);
+			// 	SDL_Delay(500); // Wait a bit for the sound to be played, because when this function quits _loadNextLevel() is called and it stops all playing sounds
+			// 	returnValue = 0;
+			// 	goto Exit;
+			// }
 			
 			// Display menu
 			// Display stretched background (so it can fit any screen resolution)

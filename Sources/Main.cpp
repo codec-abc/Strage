@@ -26,6 +26,8 @@
 #include <SmallEnemyFightingEntity.hpp>
 #include <TextureManager.hpp>
 
+#include <emscripten.h>
+
 //-------------------------------------------------------------------------------------------------
 // Private variables
 //-------------------------------------------------------------------------------------------------
@@ -112,7 +114,7 @@ static void _exitFreeResources()
 	Renderer::uninitialize();
 	
 	SDL_Quit();
-	
+		
 	LOG_INFORMATION("Game engine successfully exited.");
 }
 
@@ -484,7 +486,7 @@ static inline void _renderInterface()
 		if (spawnerBlockX < playerBlockX) HeadUpDisplay::setCompassArrowState(HeadUpDisplay::COMPASS_ARROW_ID_LEFT, true);
 		else if (spawnerBlockX > playerBlockX) HeadUpDisplay::setCompassArrowState(HeadUpDisplay::COMPASS_ARROW_ID_RIGHT, true);
 	}
-	
+
 	HeadUpDisplay::render();
 	
 	// Display a centered message if needed
@@ -534,43 +536,45 @@ static inline void _renderGame()
 	_renderInterface();
 }
 
+SDL_Event event;
+unsigned int frameRateStartingTime = 0;
+bool isFullScreenEnabled = false, isFramesPerSecondDisplayingEnabled = false;
+int levelToLoadNumber, i, framesCount = 0;
+BulletMovingEntity *pointerBullet;
+SDL_Texture *pointerFramesPerSecondSdlTexture = NULL;
+char stringFramesPerSecond[16];
+static const char *pointerStringsMainMenuWithSavegameItems[] =
+{
+	"Continue game",
+	"New game",
+	"Controls",
+	"Quit"
+};
+static const char *pointerStringsMainMenuWithoutSavegameItems[] =
+{
+	"New game",
+	"Controls",
+	"Quit"
+};
+static const char *pointerStringsPauseMenuItems[] =
+{
+	"Continue",
+	"Restart level",
+	"Quit"
+};
+static const char *pointerStringsVictoryMenuItems[] =
+{
+	"Relish your victory",
+	"Quit"
+};
+
+void callback();
+
 //-------------------------------------------------------------------------------------------------
 // Entry point
 //-------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-	SDL_Event event;
-	unsigned int frameRateStartingTime = 0;
-	bool isFullScreenEnabled = true, isFramesPerSecondDisplayingEnabled = false;
-	int levelToLoadNumber, i, framesCount = 0;
-	BulletMovingEntity *pointerBullet;
-	SDL_Texture *pointerFramesPerSecondSdlTexture = NULL;
-	char stringFramesPerSecond[16];
-	static const char *pointerStringsMainMenuWithSavegameItems[] =
-	{
-		"Continue game",
-		"New game",
-		"Controls",
-		"Quit"
-	};
-	static const char *pointerStringsMainMenuWithoutSavegameItems[] =
-	{
-		"New game",
-		"Controls",
-		"Quit"
-	};
-	static const char *pointerStringsPauseMenuItems[] =
-	{
-		"Continue",
-		"Restart level",
-		"Quit"
-	};
-	static const char *pointerStringsVictoryMenuItems[] =
-	{
-		"Relish your victory",
-		"Quit"
-	};
-	
 	// Check parameters
 	if (argc > 1)
 	{
@@ -581,8 +585,8 @@ int main(int argc, char *argv[])
 			if (strcmp("-fps", argv[i]) == 0) isFramesPerSecondDisplayingEnabled = true;
 			// Is full screen mode requested ?
 			else if (strcmp("-windowed", argv[i]) == 0) isFullScreenEnabled = false;
-			// Display help only if requested, because macOS may add custom parameters like -psn_0_340051
-			else if (strcmp("-help", argv[i]) == 0)
+			// Display help if a provided parameter is unknown
+			else
 			{
 				printf("Usage : %s [option].\n"
 					"Available options :\n"
@@ -594,13 +598,13 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	
+
 	// Initialize logging system as soon as possible
 	if (FileManager::initialize() != 0) return -1; // Must be initialized before the subsystems that use it
 	if (Log::initialize() != 0) return -1;
 	
 	// Initialize the needed SDL subsystems
-	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) != 0)
+	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER) != 0)
 	{
 		LOG_ERROR("SDL_Init() failed (%s).", SDL_GetError());
 		return -1;
@@ -633,13 +637,27 @@ int main(int argc, char *argv[])
 	_pointerGameLostInterfaceStringTexture =  Renderer::renderTextToTexture("You are dead !", Renderer::TEXT_COLOR_ID_BLUE, Renderer::FONT_SIZE_ID_BIG);
 	_pointerGameWonInterfaceStringTexture = Renderer::renderTextToTexture("All levels completed. You are legend.", Renderer::TEXT_COLOR_ID_BLUE, Renderer::FONT_SIZE_ID_BIG);
 	
-	LOG_INFORMATION("Game engine successfully initialized.");
+	LOG_INFORMATION("Game engine successfully initialized.\n");
+
+	// Create a fake texture to be used by the FPS displaying code, this avoids multiple checks to detect whether the first texture is null
+	if (isFramesPerSecondDisplayingEnabled) pointerFramesPerSecondSdlTexture = 
+		Renderer::renderTextToTexture("--", Renderer::TEXT_COLOR_ID_RED, Renderer::FONT_SIZE_ID_BIG); // Provided text can have a zero character size or it would trigger a SDL error
+
+	emscripten_set_main_loop(callback, 0, 0);
 	
+Exit:
+	return 0;
+}
+
+//static bool menuCurrentlyDisplayed = 0;
+static bool isMainMenuDisplayed = true;
+
+void callback()
+{
 	// Display the main menu and get user choice
-	bool isMainMenuDisplayed = true;
-	bool isSavegamePresent = SavegameManager::isSavegamePresent(); // Cache value to avoid checking for the file every time the menu is displayed
-	do
+	if (isMainMenuDisplayed)
 	{
+		bool isSavegamePresent = SavegameManager::isSavegamePresent(); // Cache value to avoid checking for the file every time the menu is displayed
 		if (isSavegamePresent)
 		{
 			switch (Menu::display("Main menu", pointerStringsMainMenuWithSavegameItems, 4))
@@ -659,23 +677,28 @@ int main(int argc, char *argv[])
 						
 						// Set player ammunition
 						pointerPlayer->setAmmunitionAmount(SavegameManager::getSavegameItem(SavegameManager::SAVEGAME_ITEM_ID_PLAYER_AMMUNITION));
+
+						// Load first level	
+						_loadNextLevel();
+						//AudioManager::playMusic();
 					}
 					else LOG_ERROR("No valid savegame found, starting a new game.");
 					isMainMenuDisplayed = false;
-					break;
+					return;
 					
 				// Start a new game (nothing to do because all needed variables are already initialized)
 				case 1:
 					isMainMenuDisplayed = false;
-					break;
+					return;
 					
 				// Display controls menu
 				case 2:
-					if (Menu::displayControlsMenu() != 0) goto Exit;
-					break;
+					if (Menu::displayControlsMenu() != 0) return;//goto Exit;
+					return;
 					
 				default:
-					goto Exit;
+					return;
+					//goto Exit;
 			}
 		}
 		else
@@ -685,27 +708,25 @@ int main(int argc, char *argv[])
 				// Start a new game (nothing to do because all needed variables are already initialized)
 				case 0:
 					isMainMenuDisplayed = false;
-					break;
+					// Load first level	
+					_loadNextLevel();
+					//AudioManager::playMusic();
+					return;
 					
 				// Display controls menu
 				case 1:
-					if (Menu::displayControlsMenu() != 0) goto Exit;
-					break;
+					if (Menu::displayControlsMenu() != 0) return;//goto Exit;
+					return;
 					
 				default:
-					goto Exit;
+					return;
+					//goto Exit;
 			}
 		}
-	} while (isMainMenuDisplayed);
-	
-	// Load first level
-	_loadNextLevel();
-	AudioManager::playMusic();
-	
-	// Create a fake texture to be used by the FPS displaying code, this avoids multiple checks to detect whether the first texture is null
-	if (isFramesPerSecondDisplayingEnabled) pointerFramesPerSecondSdlTexture = Renderer::renderTextToTexture("--", Renderer::TEXT_COLOR_ID_RED, Renderer::FONT_SIZE_ID_BIG); // Provided text can't have a zero character size or it would trigger a SDL error
-	
-	while (1)
+		return;
+	}
+
+
 	{
 		Renderer::beginFrame();
 		
@@ -714,51 +735,30 @@ int main(int argc, char *argv[])
 		{
 			if (frameRateStartingTime == 0) frameRateStartingTime = SDL_GetTicks();
 		}
-		
-		// Handle all relevant events
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-				case SDL_QUIT:
-					goto Exit;
-					
-				case SDL_CONTROLLERBUTTONUP:
-				case SDL_CONTROLLERBUTTONDOWN:
-				case SDL_CONTROLLERAXISMOTION:
-					ControlManager::handleGameControllerEvent(&event);
-					break;
-					
-				case SDL_KEYUP:
-				case SDL_KEYDOWN:
-					ControlManager::handleKeyboardEvent(&event);
-					break;
-			}
-		}
-		
-		// Pause or continue the game
-		if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PAUSE_GAME))
-		{
-			// Stop playing music while the game is paused (in case the game must be quickly hidden to an incoming person)
-			LOG_DEBUG("Game paused.");
-			AudioManager::pauseMusic(1);
-			
 			// Player won, display a specific menu
+			
+		if (_isGamePaused) 
+		{
 			if (_isGameFinished)
 			{
-				if (Menu::display("Victory !", pointerStringsVictoryMenuItems, 2) == 1) goto Exit;
+				if (Menu::display("Victory !", pointerStringsVictoryMenuItems, 2) == 1) return;
 			}
 			// Normal pause menu
 			else
 			{
-				switch (Menu::display("Pause", pointerStringsPauseMenuItems, 3))
+				int menuReturnValue = Menu::display("Pause", pointerStringsPauseMenuItems, 3);
+				LOG_INFORMATION("menuReturnValue %i", menuReturnValue);
+				switch (menuReturnValue)
 				{
 					// Player has selected "Continue"
 					case 0:
+						_isGamePaused = false;
+						return;
 						break;
 					
 					// Player has selected "Restart level"
 					case 1:
+						_isGamePaused = false;
 						// Stop currently playing sounds
 						AudioManager::stopAllSounds();
 						
@@ -775,6 +775,8 @@ int main(int argc, char *argv[])
 							LOG_ERROR("Failed to reload level %d.", levelToLoadNumber);
 							exit(-1);
 						}
+
+						LOG_INFORMATION("loadLevel %i", _currentLevelNumber);
 						
 						// Restore player life and ammunition count as they were at the level start
 						i = SavegameManager::getSavegameItem(SavegameManager::SAVEGAME_ITEM_ID_PLAYER_MAXIMUM_LIFE_POINTS); // Recycle 'i' variable
@@ -788,20 +790,44 @@ int main(int argc, char *argv[])
 							_isPlayerDead = false;
 							_isGamePaused = false;
 						}
+						return;
 						break;
-					
 					default:
-						goto Exit;
+						return;
+					
+					// default:
+					// 	goto Exit;
 				}
 			}
 			
 			LOG_DEBUG("Game continuing.");
 			AudioManager::pauseMusic(0);
-		}
-		
-		// Do not update the game anymore if the player died
-		if (!_isGamePaused)
+		} 
+		else
 		{
+			
+			// Handle all relevant events
+			while (SDL_PollEvent(&event))
+			{
+				switch (event.type)
+				{
+					// case SDL_QUIT:
+					// 	goto Exit;
+						
+					case SDL_CONTROLLERBUTTONUP:
+					case SDL_CONTROLLERBUTTONDOWN:
+					case SDL_CONTROLLERAXISMOTION:
+						ControlManager::handleGameControllerEvent(&event);
+						break;
+						
+					case SDL_KEYUP:
+					case SDL_KEYDOWN:
+						LOG_INFORMATION("1");
+						ControlManager::handleKeyboardEvent(&event);
+						break;
+				}
+			}
+
 			// React to player key press without depending of keyboard key repetition rate
 			// Handle both vertical and horizontal direction movement
 			if ((ControlManager::isKeyPressed(ControlManager::KEY_ID_GO_UP) || ControlManager::isKeyPressed(ControlManager::KEY_ID_GO_DOWN)) && (ControlManager::isKeyPressed(ControlManager::KEY_ID_GO_LEFT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_GO_RIGHT)))
@@ -844,6 +870,16 @@ int main(int argc, char *argv[])
 			
 			_updateGameLogic();
 		}
+
+		// Pause or continue the game
+		if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PAUSE_GAME))
+		{
+			// Stop playing music while the game is paused (in case the game must be quickly hidden to an incoming person)
+			LOG_INFORMATION("Game paused.");
+			AudioManager::pauseMusic(1);
+
+			_isGamePaused = !_isGamePaused;
+		}
 		
 		_renderGame();
 		
@@ -870,7 +906,4 @@ int main(int argc, char *argv[])
 		
 		Renderer::endFrame();
 	}
-	
-Exit:
-	return EXIT_SUCCESS;
 }
