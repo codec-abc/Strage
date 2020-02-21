@@ -120,7 +120,7 @@ namespace ControlManager
 					_isKeyPressed[KEY_ID_SECONDARY_SHOOT] = true;
 					break;
 					
-				case SDL_SCANCODE_ESCAPE:
+				case SDL_SCANCODE_BACKSPACE:
 					_isKeyPressed[KEY_ID_PAUSE_GAME] = true;
 					break;
 					
