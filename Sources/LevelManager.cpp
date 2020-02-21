@@ -142,7 +142,7 @@ namespace LevelManager
 				// Discard the following comma
 				character = fgetc(pointerFile);
 				// Load next row if a newline character is found
-				if (character == '\n')
+				if (character == '\n' || character == '\r')
 				{
 					_levelWidthBlocks = x + 1; // Set level width in the same time
 					break;
@@ -435,6 +435,8 @@ namespace LevelManager
 
 	int getBlockContent(int x, int y)
 	{
+		printf("_levelWidthBlocks %i _levelHeightBlocks %i x %i y %i \n", 
+			_levelWidthBlocks, _levelHeightBlocks, x, y);
 		// Convert coordinates to blocks
 		int xBlock = x / CONFIGURATION_LEVEL_BLOCK_SIZE;
 		int yBlock = y / CONFIGURATION_LEVEL_BLOCK_SIZE;
