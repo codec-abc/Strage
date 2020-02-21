@@ -31,49 +31,49 @@ namespace AudioManager
 	static Mix_Chunk *_pointerSounds[SOUND_IDS_COUNT];
 
 	/** All available musics. */
-	static Music _musics[] =
-	{
-		{
-			CONFIGURATION_PATH_SOUNDS "/Akashic_Records_-_Epic_Action_Hero.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/Art_Music_-_Epic_Trailer.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/Blue_Giraffe_-_Action_Intense_Cinematic.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/Celestial_Aeon_Project_-_Epic.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/E._Erkut_-_Dark_Moment_-_Dark_Epic_Trailer.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/Matti_Paalanen_-_Emotion.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/Matti_Paalanen_-_Epic_Action.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/Soundbay_-_Epic_Future.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/Soundshrim_-_Epic_Adventure.mp3",
-			NULL
-		},
-		{
-			CONFIGURATION_PATH_SOUNDS "/Nico_Wohlleben_-_Storm.mp3",
-			NULL
-		}
-	};
+	// static Music _musics[] =
+	// {
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Akashic_Records_-_Epic_Action_Hero.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Art_Music_-_Epic_Trailer.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Blue_Giraffe_-_Action_Intense_Cinematic.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Celestial_Aeon_Project_-_Epic.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/E._Erkut_-_Dark_Moment_-_Dark_Epic_Trailer.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Matti_Paalanen_-_Emotion.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Matti_Paalanen_-_Epic_Action.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Soundbay_-_Epic_Future.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Soundshrim_-_Epic_Adventure.wav",
+	// 		NULL
+	// 	},
+	// 	{
+	// 		CONFIGURATION_PATH_SOUNDS "/Nico_Wohlleben_-_Storm.wav",
+	// 		NULL
+	// 	}
+	// };
 
 	/** Gather all sounds file names to load. */
 	static const char *pointerStringsSoundFileNames[] =
@@ -104,11 +104,11 @@ namespace AudioManager
 	/** The boolean representing the condition state. */
 	static int _isCurrentMusicFinished = 0;
 	/** The mutex needed to use the thread condition. */
-	static SDL_mutex *_pointerMusicThreadMutex;
+	//static SDL_mutex *_pointerMusicThreadMutex;
 	/** The music thread that will pause between two musics and start the next one. */
-	static SDL_Thread *_pointerMusicThread;
+	//static SDL_Thread *_pointerMusicThread;
 	/** Tell the thread it must exit. */
-	static volatile int _isThreadTerminated = 0;
+	//static volatile int _isThreadTerminated = 0;
 
 	/** Load a sound from a wave file.
 	* @param pointerStringFileName The file to load.
@@ -121,6 +121,7 @@ namespace AudioManager
 		Mix_Chunk *pointerChunk = Mix_LoadWAV(pointerStringFileName);
 		if (pointerChunk == NULL)
 		{
+			printf("Mix_loadWAV: %s\n", Mix_GetError());
 			LOG_ERROR("Failed to load sound file '%s' (%s).", pointerStringFileName, Mix_GetError());
 			exit(-1);
 		}
@@ -166,26 +167,26 @@ namespace AudioManager
 
 	int initialize()
 	{
-		// Open audio mixer
-		// if (Mix_OpenAudio(CONFIGURATION_AUDIO_SAMPLING_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) != 0) // Chunk size has been randomly chosen due to extremely explicit documentation...
-		// {
-		// 	LOG_ERROR("Failed to open audio device (%s).", Mix_GetError());
-		// 	return -1;
-		// }
+		//Open audio mixer
+		if (Mix_OpenAudio(CONFIGURATION_AUDIO_SAMPLING_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) != 0) // Chunk size has been randomly chosen due to extremely explicit documentation...
+		{
+			LOG_ERROR("Failed to open audio device (%s).", Mix_GetError());
+			return -1;
+		}
 		
-		// // Set the amount of channels (i.e. how many sounds can be played simultaneously)
-		// Mix_AllocateChannels(CONFIGURATION_AUDIO_CHANNELS_COUNT); // This function can't fail, according to documentation
+		// Set the amount of channels (i.e. how many sounds can be played simultaneously)
+		Mix_AllocateChannels(CONFIGURATION_AUDIO_CHANNELS_COUNT); // This function can't fail, according to documentation
 		
-		// // Load all sounds
-		// unsigned int i;
-		// for (i = 0; i < sizeof(pointerStringsSoundFileNames) / sizeof(pointerStringsSoundFileNames[0]); i++)
-		// {
-		// 	LOG_DEBUG("Loading sound file %s...", pointerStringsSoundFileNames[i]);
-		// 	_pointerSounds[i] = _loadFromWave(FileManager::getFilePath(pointerStringsSoundFileNames[i]));
-		// }
-		// LOG_DEBUG("Successfully loaded all sound files.");
+		// Load all sounds
+		unsigned int i;
+		for (i = 0; i < sizeof(pointerStringsSoundFileNames) / sizeof(pointerStringsSoundFileNames[0]); i++)
+		{
+			LOG_DEBUG("Loading sound file %s...", pointerStringsSoundFileNames[i]);
+			_pointerSounds[i] = _loadFromWave(FileManager::getFilePath(pointerStringsSoundFileNames[i]));
+		}
+		LOG_DEBUG("Successfully loaded all sound files.");
 		
-		// // Load all musics
+		// Load all musics
 		// for (i = 0; i < MUSICS_COUNT; i++)
 		// {
 		// 	// Try to load the file
@@ -197,8 +198,8 @@ namespace AudioManager
 		// 	}
 		// }
 		
-		// // Call a callback when playing a music has finished
-		// Mix_HookMusicFinished(_wakeUpMusicThread);
+		// Call a callback when playing a music has finished
+		Mix_HookMusicFinished(_wakeUpMusicThread);
 		
 		// // Create the condition needed to synchronize the thread
 		// _pointerMusicThreadCondition = SDL_CreateCond();
@@ -229,54 +230,54 @@ namespace AudioManager
 
 	void uninitialize()
 	{
-		// Tell the thread to exit
-		// _isThreadTerminated = 1;
-		// _wakeUpMusicThread();
-		// // Wait for the thread to terminate
-		// SDL_WaitThread(_pointerMusicThread, NULL);
+		//Tell the thread to exit
+		//_isThreadTerminated = 1;
+		_wakeUpMusicThread();
+		// Wait for the thread to terminate
+		//SDL_WaitThread(_pointerMusicThread, NULL);
 		
-		// // Remove thread synchronization objects
-		// SDL_DestroyMutex(_pointerMusicThreadMutex);
-		// SDL_DestroyCond(_pointerMusicThreadCondition);
+		// Remove thread synchronization objects
+		//SDL_DestroyMutex(_pointerMusicThreadMutex);
+		//SDL_DestroyCond(_pointerMusicThreadCondition);
 		
-		// // Free all musics
-		// unsigned int i;
-		// for (i = 0; i < MUSICS_COUNT; i++) Mix_FreeMusic(_musics[i].pointerMusicHandle);
+		// Free all musics
+		unsigned int i;
+		//for (i = 0; i < MUSICS_COUNT; i++) Mix_FreeMusic(_musics[i].pointerMusicHandle);
 		
-		// // Free all sounds
-		// for (i = 0; i < SOUND_IDS_COUNT; i++) Mix_FreeChunk(_pointerSounds[i]);
+		// Free all sounds
+		for (i = 0; i < SOUND_IDS_COUNT; i++) Mix_FreeChunk(_pointerSounds[i]);
 		
-		// // Release audio mixer
-		// Mix_CloseAudio();
+		// Release audio mixer
+		Mix_CloseAudio();
 	}
 
 	void playSound(SoundId id)
 	{
-		// if (id < SOUND_IDS_COUNT)
-		// {
-		// 	// Try to play the sound on the first available channel
-		// 	if (Mix_PlayChannel(-1, _pointerSounds[id], 0) == -1) LOG_DEBUG("Failed to play sound ID %d (%s).", id, Mix_GetError());
-		// }
+		if (id < SOUND_IDS_COUNT)
+		{
+			// Try to play the sound on the first available channel
+			if (Mix_PlayChannel(-1, _pointerSounds[id], 0) == -1) LOG_DEBUG("Failed to play sound ID %d (%s).", id, Mix_GetError());
+		}
 	}
 
 	void playMusic()
 	{
-		// // Select a random music
-		// int musicIndex = rand() % MUSICS_COUNT;
+		// Select a random music
+		//int musicIndex = rand() % MUSICS_COUNT;
 		
-		// // Try to play it
-		// if (Mix_PlayMusic(_musics[musicIndex].pointerMusicHandle, 1) != 0) LOG_ERROR("Failed to play music %s (%s).", _musics[musicIndex].pointerStringFileName, Mix_GetError());
-		// else LOG_DEBUG("Playing music '%s'.", _musics[musicIndex].pointerStringFileName);
+		// Try to play it
+		//if (Mix_PlayMusic(_musics[musicIndex].pointerMusicHandle, 1) != 0) LOG_ERROR("Failed to play music %s (%s).", _musics[musicIndex].pointerStringFileName, Mix_GetError());
+		//else LOG_DEBUG("Playing music '%s'.", _musics[musicIndex].pointerStringFileName);
 	}
 
 	void pauseMusic(bool isMusicPaused)
 	{
-		// if (isMusicPaused) Mix_PauseMusic();
-		// else Mix_ResumeMusic();
+		if (isMusicPaused) Mix_PauseMusic();
+		else Mix_ResumeMusic();
 	}
 
 	void stopAllSounds()
 	{
-		// Mix_HaltChannel(-1);
+		Mix_HaltChannel(-1);
 	}
 }
