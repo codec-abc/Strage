@@ -46,6 +46,7 @@ namespace Log
 		va_start(argumentsList, pointerMessageFormat);
 		
 		// Append the message
+		vprintf(pointerMessageFormat, argumentsList);
 		vfprintf(_pointerFile, pointerMessageFormat, argumentsList);
 		
 		va_end(argumentsList);
