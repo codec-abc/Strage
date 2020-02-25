@@ -11,6 +11,7 @@
 #include <Renderer.hpp>
 #include <SDL2/SDL.h>
 #include <TextureManager.hpp>
+#include <emscripten.h>
 
 namespace Menu
 {
@@ -98,22 +99,19 @@ namespace Menu
 		}
 	}
 
-	int focusedMenuItemIndex = 0; 
-	int isGoUpKeyPressed = 0, isGoDownKeyPressed = 0, isSelectKeyPressed = 0;
-	SDL_Texture *pointerTexture;
-
 	int display(const char *pointerStringMenuTitle, const char *pointerStringsMenuItemsTexts[], int menuItemsCount)
-	{	
+	{
 		SDL_Event event;
-		int returnValue = 3;
-		int i;
+		int returnValue, i, focusedMenuItemIndex = 0, isGoUpKeyPressed = 0, isGoDownKeyPressed = 0, isSelectKeyPressed = 0;
+		SDL_Texture *pointerTexture;
+		
 		// This variable is shared by all internal functions, it must be initialized before calling any of the functions
 		_menuItemsCount = menuItemsCount;
 		
 		// Cache textures to display
 		_initialize(pointerStringMenuTitle, pointerStringsMenuItemsTexts);
 		
-		//while (1)
+		while (1)
 		{
 			Renderer::beginFrame();
 			
@@ -139,6 +137,7 @@ namespace Menu
 						ControlManager::handleKeyboardEvent(&event);
 						break;
 				}
+				emscripten_sleep(1);
 			}
 			
 			// Handle key press
@@ -165,21 +164,16 @@ namespace Menu
 			}
 			else isGoDownKeyPressed = 0;
 			// Select key
-			if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PRIMARY_SHOOT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_MENU_SELECT)) 
+			if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PRIMARY_SHOOT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_MENU_SELECT)) isSelectKeyPressed = 1; // Wait for the key to be released to execute the associated action, so the shoot key is not pressed when entering the game (this avoids the player immediately shooting when entering the game because the shoot key is pressed yet)
+			else if (isSelectKeyPressed)
 			{
-				//isSelectKeyPressed = 1;
-				return focusedMenuItemIndex;
-				// Wait for the key to be released to execute the associated action, so the shoot key is not pressed when entering the game (this avoids the player immediately shooting when entering the game because the shoot key is pressed yet)
-			}
-			// else if (isSelectKeyPressed)
-			// {
-			// 	AudioManager::playSound(AudioManager::SOUND_ID_MENU_SELECT);
-			// 	SDL_Delay(500); // Wait a bit for the sound to be played, because when this function quits _loadNextLevel() is called and it stops all playing sounds
+				AudioManager::playSound(AudioManager::SOUND_ID_MENU_SELECT);
+				SDL_Delay(500); // Wait a bit for the sound to be played, because when this function quits _loadNextLevel() is called and it stops all playing sounds
 				
-			// 	//returnValue = focusedMenuItemIndex;
-			// 	LOG_DEBUG("Selected item %d.", focusedMenuItemIndex);
-			// 	goto Exit;
-			// }
+				returnValue = focusedMenuItemIndex;
+				LOG_DEBUG("Selected item %d.", focusedMenuItemIndex);
+				goto Exit;
+			}
 			
 			// Display menu
 			// Display stretched background (so it can fit any screen resolution)
@@ -197,6 +191,7 @@ namespace Menu
 			}
 			
 			Renderer::endFrame();
+			 emscripten_sleep(1);
 		}
 		
 	Exit:
@@ -204,29 +199,27 @@ namespace Menu
 		_uninitialize();
 		return returnValue;
 	}
-
-	static const char *pointerStringMenuItems[] =
-	{
-		"Arrow keys or WASD : move",
-		"Space : primary shoot",
-		"Left control : mortar shoot",
-		"Escape : pause game",
-		"Back"
-	};
-		
-	// This variable is shared by all internal functions, it must be initialized before calling any of the functions
-
 	
 	int displayControlsMenu()
 	{
 		SDL_Event event;
-		int i;
-		int returnValue = 0;
-		int isSelectKeyPressed = 0;
+		int returnValue, i, isSelectKeyPressed = 0;
+		static const char *pointerStringMenuItems[] =
+		{
+			"Arrow keys or WASD : move",
+			"Space : primary shoot",
+			"Left control : mortar shoot",
+			"Escape : pause game",
+			"Back"
+		};
+		
+		// This variable is shared by all internal functions, it must be initialized before calling any of the functions
+		_menuItemsCount = 5;
+		
 		// Cache textures to display
 		_initialize("Controls", pointerStringMenuItems);
 		
-		//while (1)
+		while (1)
 		{
 			Renderer::beginFrame();
 			
@@ -252,24 +245,19 @@ namespace Menu
 						ControlManager::handleKeyboardEvent(&event);
 						break;
 				}
+				emscripten_sleep(1);
 			}
 			
 			// Handle key press
 			// Select key
-			if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PRIMARY_SHOOT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_MENU_SELECT)) 
-		
+			if (ControlManager::isKeyPressed(ControlManager::KEY_ID_PRIMARY_SHOOT) || ControlManager::isKeyPressed(ControlManager::KEY_ID_MENU_SELECT)) isSelectKeyPressed = 1; // Wait for the key to be released to execute the associated action, so the shoot key is not pressed when entering the game (this avoids the player immediately shooting when entering the game because the shoot key is pressed yet)
+			else if (isSelectKeyPressed)
 			{
-				isSelectKeyPressed = 1; 
-				return focusedMenuItemIndex;
-				// Wait for the key to be released to execute the associated action, so the shoot key is not pressed when entering the game (this avoids the player immediately shooting when entering the game because the shoot key is pressed yet)
+				AudioManager::playSound(AudioManager::SOUND_ID_MENU_SELECT);
+				SDL_Delay(500); // Wait a bit for the sound to be played, because when this function quits _loadNextLevel() is called and it stops all playing sounds
+				returnValue = 0;
+				goto Exit;
 			}
-			// else if (isSelectKeyPressed)
-			// {
-			// 	AudioManager::playSound(AudioManager::SOUND_ID_MENU_SELECT);
-			// 	SDL_Delay(500); // Wait a bit for the sound to be played, because when this function quits _loadNextLevel() is called and it stops all playing sounds
-			// 	returnValue = 0;
-			// 	goto Exit;
-			// }
 			
 			// Display menu
 			// Display stretched background (so it can fit any screen resolution)
@@ -282,6 +270,7 @@ namespace Menu
 			Renderer::renderTexture(_menuItems[_menuItemsCount - 1].pointerFocusedTexture, _menuItems[_menuItemsCount - 1].x, _menuItems[_menuItemsCount - 1].y);
 			
 			Renderer::endFrame();
+			emscripten_sleep(1);
 		}
 		
 		Exit:
