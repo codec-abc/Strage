@@ -139,7 +139,7 @@ namespace LevelManager
 				}
 				i++;
 				
-				// Discard the following comma
+				// Discard the following commA
 				character = fgetc(pointerFile);
 				// Load next row if a newline character is found
 				if (character == '\n' || character == '\r')
@@ -236,7 +236,7 @@ namespace LevelManager
 						break;
 				}
 				
-				// Discard the following comma
+				// Discard the following commA
 				character = fgetc(pointerFile);
 			}
 		}

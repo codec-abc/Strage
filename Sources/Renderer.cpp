@@ -184,7 +184,7 @@ namespace Renderer
 		// Store the time when the frame computation started
 		_frameStartingTime = SDL_GetTicks();
 		
-		// Clean the rendering area
+		// Clean the rendering areA
 		SDL_RenderClear(pointerRenderer);
 	}
 
