@@ -31,54 +31,54 @@ namespace AudioManager
 	static Mix_Chunk *_pointerSounds[SOUND_IDS_COUNT];
 
 	/** All available musics. */
-	// static Music _musics[] =
-	// {
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Akashic_Records_-_Epic_Action_Hero.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Art_Music_-_Epic_Trailer.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Blue_Giraffe_-_Action_Intense_Cinematic.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Celestial_Aeon_Project_-_Epic.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/E._Erkut_-_Dark_Moment_-_Dark_Epic_Trailer.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Matti_Paalanen_-_Emotion.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Matti_Paalanen_-_Epic_Action.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Soundbay_-_Epic_Future.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Soundshrim_-_Epic_Adventure.wav",
-	// 		NULL
-	// 	},
-	// 	{
-	// 		CONFIGURATION_PATH_SOUNDS "/Nico_Wohlleben_-_Storm.wav",
-	// 		NULL
-	// 	}
-	// };
+	static Music _musics[] =
+	{
+		{
+			CONFIGURATION_PATH_SOUNDS "/Akashic_Records_-_Epic_Action_Hero.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/Art_Music_-_Epic_Trailer.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/Blue_Giraffe_-_Action_Intense_Cinematic.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/Celestial_Aeon_Project_-_Epic.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/E._Erkut_-_Dark_Moment_-_Dark_Epic_Trailer.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/Matti_Paalanen_-_Emotion.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/Matti_Paalanen_-_Epic_Action.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/Soundbay_-_Epic_Future.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/Soundshrim_-_Epic_Adventure.ogg",
+			NULL
+		},
+		{
+			CONFIGURATION_PATH_SOUNDS "/Nico_Wohlleben_-_Storm.ogg",
+			NULL
+		}
+	};
 
 	/** Gather all sounds file names to load. */
 	static const char *pointerStringsSoundFileNames[] =
 	{
-		CONFIGURATION_PATH_SOUNDS "/Ammunition_Taken.wav",
+		CONFIGURATION_PATH_SOUNDS "/Ammunition_Taken.ogg",
 		CONFIGURATION_PATH_SOUNDS "/Player_Fireshot.wav",
 		CONFIGURATION_PATH_SOUNDS "/Player_Fireshot_Mortar_Shell.wav",
 		CONFIGURATION_PATH_SOUNDS "/Player_Mortar_Shell_Reloading.wav",
@@ -187,16 +187,16 @@ namespace AudioManager
 		LOG_DEBUG("Successfully loaded all sound files.");
 		
 		// Load all musics
-		// for (i = 0; i < MUSICS_COUNT; i++)
-		// {
-		// 	// Try to load the file
-		// 	_musics[i].pointerMusicHandle = Mix_LoadMUS(FileManager::getFilePath(_musics[i].pointerStringFileName));
-		// 	if (_musics[i].pointerMusicHandle == NULL)
-		// 	{
-		// 		LOG_ERROR("Failed to load music '%s' (%s).", _musics[i].pointerStringFileName, Mix_GetError());
-		// 		return -1;
-		// 	}
-		// }
+		for (i = 0; i < MUSICS_COUNT; i++)
+		{
+			// Try to load the file
+			_musics[i].pointerMusicHandle = Mix_LoadMUS(FileManager::getFilePath(_musics[i].pointerStringFileName));
+			if (_musics[i].pointerMusicHandle == NULL)
+			{
+				LOG_ERROR("Failed to load music '%s' (%s).", _musics[i].pointerStringFileName, Mix_GetError());
+				return -1;
+			}
+		}
 		
 		// Call a callback when playing a music has finished
 		Mix_HookMusicFinished(_wakeUpMusicThread);
@@ -242,7 +242,7 @@ namespace AudioManager
 		
 		// Free all musics
 		unsigned int i;
-		//for (i = 0; i < MUSICS_COUNT; i++) Mix_FreeMusic(_musics[i].pointerMusicHandle);
+		for (i = 0; i < MUSICS_COUNT; i++) Mix_FreeMusic(_musics[i].pointerMusicHandle);
 		
 		// Free all sounds
 		for (i = 0; i < SOUND_IDS_COUNT; i++) Mix_FreeChunk(_pointerSounds[i]);
@@ -263,11 +263,11 @@ namespace AudioManager
 	void playMusic()
 	{
 		// Select a random music
-		//int musicIndex = rand() % MUSICS_COUNT;
+		int musicIndex = rand() % MUSICS_COUNT;
 		
 		// Try to play it
-		//if (Mix_PlayMusic(_musics[musicIndex].pointerMusicHandle, 1) != 0) LOG_ERROR("Failed to play music %s (%s).", _musics[musicIndex].pointerStringFileName, Mix_GetError());
-		//else LOG_DEBUG("Playing music '%s'.", _musics[musicIndex].pointerStringFileName);
+		if (Mix_PlayMusic(_musics[musicIndex].pointerMusicHandle, 1) != 0) LOG_ERROR("Failed to play music %s (%s).", _musics[musicIndex].pointerStringFileName, Mix_GetError());
+		else LOG_DEBUG("Playing music '%s'.", _musics[musicIndex].pointerStringFileName);
 	}
 
 	void pauseMusic(bool isMusicPaused)
