@@ -137,7 +137,6 @@ namespace Menu
 						ControlManager::handleKeyboardEvent(&event);
 						break;
 				}
-				emscripten_sleep(1);
 			}
 			
 			// Handle key press
@@ -191,7 +190,7 @@ namespace Menu
 			}
 			
 			Renderer::endFrame();
-			 emscripten_sleep(1);
+			emscripten_sleep(1);
 		}
 		
 	Exit:
@@ -245,7 +244,6 @@ namespace Menu
 						ControlManager::handleKeyboardEvent(&event);
 						break;
 				}
-				emscripten_sleep(1);
 			}
 			
 			// Handle key press
