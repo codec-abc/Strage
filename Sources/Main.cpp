@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
 {
 	SDL_Event event;
 	unsigned int frameRateStartingTime = 0;
-	bool isFullScreenEnabled = true, isFramesPerSecondDisplayingEnabled = false;
+	bool isFullScreenEnabled = true, isFramesPerSecondDisplayingEnabled = true;
 	isFullScreenEnabled = false;
 	int levelToLoadNumber, i, framesCount = 0;
 	BulletMovingEntity *pointerBullet;
