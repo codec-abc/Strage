@@ -171,7 +171,7 @@ namespace AudioManager
 	{
 		// Open audio mixer
 		// Chunk size has been randomly chosen due to extremely explicit documentation...
-		if (Mix_OpenAudio(CONFIGURATION_AUDIO_SAMPLING_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048) != 0) 
+		if (Mix_OpenAudio(CONFIGURATION_AUDIO_SAMPLING_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 4096) != 0) 
 		{
 			LOG_ERROR("Failed to open audio device (%s).", Mix_GetError());
 			return -1;
