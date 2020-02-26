@@ -190,7 +190,7 @@ namespace Menu
 			}
 			
 			Renderer::endFrame();
-			emscripten_sleep(1);
+			emscripten_sleep(0);
 		}
 		
 	Exit:
@@ -268,7 +268,7 @@ namespace Menu
 			Renderer::renderTexture(_menuItems[_menuItemsCount - 1].pointerFocusedTexture, _menuItems[_menuItemsCount - 1].x, _menuItems[_menuItemsCount - 1].y);
 			
 			Renderer::endFrame();
-			emscripten_sleep(1);
+			emscripten_sleep(0);
 		}
 		
 		Exit:

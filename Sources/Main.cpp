@@ -872,7 +872,7 @@ int main(int argc, char *argv[])
 		}
 		
 		Renderer::endFrame();
-		emscripten_sleep(1);
+		emscripten_sleep(0);
 	}
 	
 Exit:

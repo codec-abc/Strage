@@ -137,6 +137,8 @@ namespace AudioManager
 		// _isCurrentMusicFinished = 1;
 		// SDL_CondSignal(_pointerMusicThreadCondition);
 		// SDL_UnlockMutex(_pointerMusicThreadMutex);
+
+		playMusic();
 	}
 
 	/** Wait for _wakeUpMusicThread() signal, pause some time and play the next music.
@@ -167,8 +169,9 @@ namespace AudioManager
 
 	int initialize()
 	{
-		//Open audio mixer
-		if (Mix_OpenAudio(CONFIGURATION_AUDIO_SAMPLING_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) != 0) // Chunk size has been randomly chosen due to extremely explicit documentation...
+		// Open audio mixer
+		// Chunk size has been randomly chosen due to extremely explicit documentation...
+		if (Mix_OpenAudio(CONFIGURATION_AUDIO_SAMPLING_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048) != 0) 
 		{
 			LOG_ERROR("Failed to open audio device (%s).", Mix_GetError());
 			return -1;
