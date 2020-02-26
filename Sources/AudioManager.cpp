@@ -79,24 +79,24 @@ namespace AudioManager
 	static const char *pointerStringsSoundFileNames[] =
 	{
 		CONFIGURATION_PATH_SOUNDS "/Ammunition_Taken.ogg",
-		CONFIGURATION_PATH_SOUNDS "/Player_Fireshot.wav",
-		CONFIGURATION_PATH_SOUNDS "/Player_Fireshot_Mortar_Shell.wav",
-		CONFIGURATION_PATH_SOUNDS "/Player_Mortar_Shell_Reloading.wav",
-		CONFIGURATION_PATH_SOUNDS "/Player_Healed.wav",
-		CONFIGURATION_PATH_SOUNDS "/Player_Life_Increased.wav",
-		CONFIGURATION_PATH_SOUNDS "/Small_Enemy_Fireshot.wav",
-		CONFIGURATION_PATH_SOUNDS "/Medium_Enemy_Fireshot.wav",
-		CONFIGURATION_PATH_SOUNDS "/Big_Enemy_Fireshot.wav",
-		CONFIGURATION_PATH_SOUNDS "/Enemy_Bullet_Impact.wav",
-		CONFIGURATION_PATH_SOUNDS "/Small_Enemy_Explosion.wav",
-		CONFIGURATION_PATH_SOUNDS "/Medium_Enemy_Explosion.wav",
-		CONFIGURATION_PATH_SOUNDS "/Big_Enemy_Explosion.wav",
-		CONFIGURATION_PATH_SOUNDS "/Enemy_Spawner_Bullet_Impact.wav",
-		CONFIGURATION_PATH_SOUNDS "/Enemy_Spawner_Explosion.wav",
-		CONFIGURATION_PATH_SOUNDS "/Menu_Move.wav",
-		CONFIGURATION_PATH_SOUNDS "/Menu_Select.wav",
-		CONFIGURATION_PATH_SOUNDS "/Machine_Gun_Taken.wav",
-		CONFIGURATION_PATH_SOUNDS "/Bulletproof_Vest_Taken.wav"
+		CONFIGURATION_PATH_SOUNDS "/Player_Fireshot.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Player_Fireshot_Mortar_Shell.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Player_Mortar_Shell_Reloading.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Player_Healed.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Player_Life_Increased.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Small_Enemy_Fireshot.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Medium_Enemy_Fireshot.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Big_Enemy_Fireshot.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Enemy_Bullet_Impact.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Small_Enemy_Explosion.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Medium_Enemy_Explosion.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Big_Enemy_Explosion.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Enemy_Spawner_Bullet_Impact.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Enemy_Spawner_Explosion.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Menu_Move.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Menu_Select.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Machine_Gun_Taken.ogg",
+		CONFIGURATION_PATH_SOUNDS "/Bulletproof_Vest_Taken.ogg"
 	};
 
 	/** Make the thread wait until a new music must be played. */
