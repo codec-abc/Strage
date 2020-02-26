@@ -28,6 +28,8 @@ namespace Renderer
 	/** Store the time in milliseconds when a frame creation started. */
 	static unsigned int _frameStartingTime = 0;
 
+	static unsigned int _framecount = 0;
+
 	// Public variable, documentation is in the header file
 	SDL_Renderer *pointerRenderer;
 
@@ -193,9 +195,19 @@ namespace Renderer
 		// Display the rendered picture
 		SDL_RenderPresent(pointerRenderer);
 
+		unsigned int elapsed = SDL_GetTicks();
+		unsigned int expected = CONFIGURATION_DISPLAY_REFRESH_PERIOD_MILLISECONDS * _framecount;
+
+		_framecount++;
+
 		// Wait enough time to achieve a 60Hz refresh rate
-		unsigned int frameElapsedTime = SDL_GetTicks() - _frameStartingTime;
-		if (frameElapsedTime < CONFIGURATION_DISPLAY_REFRESH_PERIOD_MILLISECONDS) SDL_Delay(CONFIGURATION_DISPLAY_REFRESH_PERIOD_MILLISECONDS - frameElapsedTime);
+		if (expected >= elapsed + CONFIGURATION_DISPLAY_REFRESH_PERIOD_MILLISECONDS / 2) {
+			unsigned int diff = expected - elapsed;
+			//printf("FRAME %u, Elapsed real time: %u ms, expected time: %u ms, waiting: %u ms\n", _framecount, elapsed, expected, diff);
+			SDL_Delay(diff);
+		} else {
+			//printf("FRAME %u, Game is late, no waiting for this frame\n", _framecount);
+		}
 	}
 
 	SDL_Texture *renderTextToTexture(const char *pointerStringText, TextColorId colorId, FontSizeId fontSizeId)
