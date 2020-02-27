@@ -15,7 +15,7 @@ RUN \
 # Then type thoses command into the terminal to build the game
 # cd /app/emsdk
 # ./emsdk install latest
-# ./emsdk install latest
+# ./emsdk activate latest
 # source ./emsdk_env.sh
 # cd /HostMount
 # emcc ./Sources/*.cpp -I ./Includes -s WASM=1 -s USE_SDL=2 -s USE_SDL_MIXER=2 -s USE_OGG=1 -s USE_VORBIS=1 -s USE_SDL_TTF=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='["png"]' -s ASSERTIONS=1 -s EXIT_RUNTIME=1 -s ASYNCIFY=1 -s ALLOW_MEMORY_GROWTH=1  -O3 -o build/index.js --preload-file data@
